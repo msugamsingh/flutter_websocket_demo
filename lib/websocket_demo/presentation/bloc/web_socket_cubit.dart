@@ -34,12 +34,16 @@ class WebSocketCubit extends Cubit<WebSocketState> {
       emit(state.copyWith(status: WebSocketStatus.connected));
       _subscription = _getMessagesStreamUseCase().listen(
         (message) {
+          if (message == 'ping') {
+           _sendMessageUseCase('pong');
+           return;
+          }
           emit(state.copyWith(messages: [...state.messages, message]));
         },
         onError: (error) {
           emit(
             state.copyWith(
-              status: WebSocketStatus.error,
+              status: WebSocketStatus.disconnected,
               error: error.toString(),
             ),
           );
